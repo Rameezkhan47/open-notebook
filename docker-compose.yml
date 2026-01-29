@@ -1,0 +1,31 @@
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:v2
+    command: start --user ${SURREAL_USER:-root} --pass ${SURREAL_PASSWORD:-password} --bind 0.0.0.0:8000 rocksdb:/mydata/mydatabase.db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./surreal_data:/mydata
+
+  open_notebook:
+    image: lfnovo/open_notebook:v1-latest
+    pull_policy: always
+    ports:
+      - "8502:8502"  # Web UI
+      - "5055:5055"  # API
+    environment:
+      # AI Provider - Ollama
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-http://host.docker.internal:11434}
+      # Database
+      - SURREAL_URL=ws://surrealdb:8000/rpc
+      - SURREAL_USER=${SURREAL_USER:-root}
+      - SURREAL_PASSWORD=${SURREAL_PASSWORD:-password}
+      - SURREAL_NAMESPACE=${SURREAL_NAMESPACE:-open_notebook}
+      - SURREAL_DATABASE=${SURREAL_DATABASE:-open_notebook}
+    volumes:
+      - ./notebook_data:/app/data
+    depends_on:
+      - surrealdb
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
