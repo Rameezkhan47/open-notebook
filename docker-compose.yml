@@ -23,9 +23,9 @@ services:
     platform: linux/amd64
     pull_policy: always
     stop_grace_period: 15s
-    expose:
-      - "8502"
-      - "5055"
+    ports:
+      - "8502:8502"
+      - "5055:5055"
     environment:
       # Ollama (local); used when OPENAI_API_BASE is not set
       - OLLAMA_API_BASE=http://ollama:11434
@@ -44,20 +44,6 @@ services:
     depends_on:
       - surrealdb
       - ollama
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine
-    platform: linux/amd64
-    ports:
-      - "8502:8502"
-      - "5055:5055"
-    volumes:
-      # Mount directory (Windows Docker requires dir, not single file)
-      - ./nginx:/etc/nginx:ro
-      - ./certs:/etc/nginx/certs:ro
-    depends_on:
-      - open_notebook
     restart: unless-stopped
 
 volumes:
