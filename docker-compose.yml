@@ -1,6 +1,7 @@
 services:
   ollama:
     image: ollama/ollama:latest
+    platform: linux/amd64
     ports:
       - "11434:11434"
     volumes:
@@ -9,6 +10,7 @@ services:
 
   surrealdb:
     image: surrealdb/surrealdb:v2
+    platform: linux/amd64
     command: start --user ${SURREAL_USER:-root} --pass ${SURREAL_PASSWORD:-password} --bind 0.0.0.0:8000 rocksdb:/mydata/mydatabase.db
     ports:
       - "8000:8000"
@@ -18,7 +20,9 @@ services:
 
   open_notebook:
     image: lfnovo/open_notebook:v1-latest
+    platform: linux/amd64
     pull_policy: always
+    stop_grace_period: 15s
     expose:
       - "8502"
       - "5055"
@@ -44,6 +48,7 @@ services:
 
   nginx:
     image: nginx:alpine
+    platform: linux/amd64
     ports:
       - "8502:8502"
       - "5055:5055"
