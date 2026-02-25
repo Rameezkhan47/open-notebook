@@ -11,9 +11,9 @@ services:
   open_notebook:
     image: lfnovo/open_notebook:v1-latest
     pull_policy: always
-    expose:
-      - "8502"
-      - "5055"
+    ports:
+      - "8502:8502"
+      - "5055:5055"
     environment:
       - OPEN_NOTEBOOK_ENCRYPTION_KEY=${OPEN_NOTEBOOK_ENCRYPTION_KEY:-}
       - OPEN_NOTEBOOK_PASSWORD=${OPEN_NOTEBOOK_PASSWORD:-open-notebook-change-me}
@@ -29,15 +29,4 @@ services:
       - ./notebook_data:/app/data
     depends_on:
       - surrealdb
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "8502:8502"
-      - "5055:5055"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - open_notebook
     restart: unless-stopped
