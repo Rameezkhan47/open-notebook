@@ -46,7 +46,6 @@ services:
       - "5055:5055"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
     depends_on:
       - open_notebook
     restart: unless-stopped
