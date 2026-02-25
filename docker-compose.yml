@@ -1,7 +1,6 @@
 services:
   ollama:
     image: ollama/ollama:latest
-    platform: linux/amd64
     ports:
       - "11434:11434"
     volumes:
@@ -10,7 +9,6 @@ services:
 
   surrealdb:
     image: surrealdb/surrealdb:v2
-    platform: linux/amd64
     command: start --user ${SURREAL_USER:-root} --pass ${SURREAL_PASSWORD:-password} --bind 0.0.0.0:8000 rocksdb:/mydata/mydatabase.db
     ports:
       - "8000:8000"
@@ -20,20 +18,15 @@ services:
 
   open_notebook:
     image: lfnovo/open_notebook:v1-latest
-    platform: linux/amd64
     pull_policy: always
-    stop_grace_period: 15s
-    ports:
-      - "8502:8502"
-      - "5055:5055"
+    expose:
+      - "8502"
+      - "5055"
     environment:
-      # Ollama (local); used when OPENAI_API_BASE is not set
       - OLLAMA_API_BASE=http://ollama:11434
-      # OpenAI-compatible endpoint (e.g. Azure AI Foundry) – set in Jenkins for cloud LLM
       - OPENAI_API_BASE=${OPENAI_API_BASE:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_MODEL=${OPENAI_MODEL:-Llama-3.3-70B-Instruct}
-      # SurrealDB
       - SURREAL_URL=ws://surrealdb:8000/rpc
       - SURREAL_USER=${SURREAL_USER:-root}
       - SURREAL_PASSWORD=${SURREAL_PASSWORD:-password}
@@ -44,6 +37,18 @@ services:
     depends_on:
       - surrealdb
       - ollama
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8502:8502"
+      - "5055:5055"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - open_notebook
     restart: unless-stopped
 
 volumes:
